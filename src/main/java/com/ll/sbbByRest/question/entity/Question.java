@@ -3,12 +3,14 @@ package com.ll.sbbByRest.question.entity;
 import com.ll.sbbByRest.answer.entity.Answer;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Getter
+@Setter
 public class Question {
 
     @Id
