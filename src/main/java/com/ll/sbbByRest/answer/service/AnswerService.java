@@ -1,4 +1,4 @@
-package com.ll.sbbByRest.answer.answer;
+package com.ll.sbbByRest.answer.service;
 
 import com.ll.sbbByRest.answer.entity.Answer;
 import com.ll.sbbByRest.answer.repository.AnswerRepository;
@@ -23,7 +23,6 @@ public class AnswerService {
         this.answerRepository.save(answer);
         return answer;
     }
-
 
 
 

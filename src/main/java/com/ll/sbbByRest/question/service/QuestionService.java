@@ -1,6 +1,5 @@
 package com.ll.sbbByRest.question.service;
 
-import com.ll.sbbByRest.exceptions.DataNotFoundException;
 import com.ll.sbbByRest.question.entity.Question;
 import com.ll.sbbByRest.question.repository.QuestionRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,14 +35,8 @@ public class QuestionService {
         return this.questionRepository.findAll(pageable);
     }
 
-    public Question getQuestion(Integer id) {
-        Optional<Question> oq = this.questionRepository.findById(id);
-        if (oq.isPresent()) {
-            return oq.get();
-        } else {
-            throw new DataNotFoundException("question not found");
-        }
-
+    public Optional<Question> findById(Integer id) {
+        return this.questionRepository.findById(id);
     }
 
     public Question create(String title, String content) {
@@ -52,7 +45,19 @@ public class QuestionService {
         q.setContent(content);
         q.setCreateDate(LocalDateTime.now());
 
-        return this.questionRepository.save(q);
+        this.questionRepository.save(q);
+        return q;
+    }
+
+    public void modify(Question question,String title, String content) {
+        question.setTitle(title);
+        question.setContent(content);
+
+        this.questionRepository.save(question);
+    }
+
+    public void delete(Question question) {
+        this.questionRepository.delete(question);
     }
 
 

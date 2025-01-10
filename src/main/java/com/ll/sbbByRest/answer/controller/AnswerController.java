@@ -1,11 +1,13 @@
 package com.ll.sbbByRest.answer.controller;
 
-import com.ll.sbbByRest.answer.answer.AnswerService;
 import com.ll.sbbByRest.answer.dto.AnswerDto;
 import com.ll.sbbByRest.answer.entity.Answer;
 import com.ll.sbbByRest.answer.form.AnswerForm;
+import com.ll.sbbByRest.answer.service.AnswerService;
+import com.ll.sbbByRest.exceptions.ServiceException;
 import com.ll.sbbByRest.question.entity.Question;
 import com.ll.sbbByRest.question.service.QuestionService;
+import com.ll.sbbByRest.rs.RsData;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,15 +17,18 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/questions/{postId}/answer")
+@RequestMapping("/api/questions/{postId}/answers")
 public class AnswerController {
 
     private final AnswerService answerService;
     private final QuestionService questionService;
+//    private final UserService userService;
 
     @GetMapping
     public List<AnswerDto> answerList(@PathVariable("postId") Integer postId) {
-        Question q = this.questionService.getQuestion(postId);
+        Question q = this.questionService.findById(postId).orElseThrow(
+                () -> new ServiceException("404-1", "%d번 글은 존재하지 않습니다.".formatted(postId))
+        );
 
         return q.getAnswerList()
                 .stream()
@@ -31,16 +36,42 @@ public class AnswerController {
                 .toList();
     }
 
+    @GetMapping("/{id}")
+    public AnswerDto getAnswer(
+            @PathVariable("postId") Integer postId,
+            @PathVariable("id") Integer id
+    ) {
+        Question question = this.questionService.findById(postId).orElseThrow(
+                () -> new ServiceException("404-1", "%d번 글은 존재하지 않습니다.".formatted(postId))
+        );
+
+        return question
+                .getAnswerById(id)
+                .map(AnswerDto :: new)
+                .orElseThrow(
+                        () -> new ServiceException("404-2", "%d번 댓글은 존재하지 않습니다.".formatted(id))
+                );
+
+    }
+
+
     @PostMapping
     @Transactional
-    public String createAnswer(@PathVariable("postId") Integer postId,
-                               @RequestBody @Valid AnswerForm answerForm) {
-        Question q = this.questionService.getQuestion(postId);
+    public RsData<AnswerDto> createAnswer(@PathVariable("postId") Integer postId,
+                                          @RequestBody @Valid AnswerForm answerForm) {
+        Question question = this.questionService.findById(postId).orElseThrow(
+                () -> new ServiceException("404-1", "%d번 글은 존재하지 않습니다.".formatted(postId))
+        );
 
-        Answer answer = this.answerService.save(q, answerForm.getContent());
+        Answer answer = this.answerService.save(question, answerForm.getContent());
 
-        return "%d번 댓글이 작성되었습니다.".formatted(answer.getId());
+        return new RsData<>(
+                "401-1",
+                "%d번 댓글이 작성되었습니다.".formatted(answer.getId()),
+                new AnswerDto(answer)
+        );
     }
+
 
 
 

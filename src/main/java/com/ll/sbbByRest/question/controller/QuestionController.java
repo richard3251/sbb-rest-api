@@ -1,9 +1,11 @@
 package com.ll.sbbByRest.question.controller;
 
+import com.ll.sbbByRest.exceptions.ServiceException;
 import com.ll.sbbByRest.question.dto.QuestionDto;
 import com.ll.sbbByRest.question.entity.Question;
 import com.ll.sbbByRest.question.form.QuestionForm;
 import com.ll.sbbByRest.question.service.QuestionService;
+import com.ll.sbbByRest.rs.RsData;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -14,7 +16,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/questions")
+@RequestMapping("api/questions")
 public class QuestionController {
 
     private final QuestionService questionService;
@@ -45,18 +47,65 @@ public class QuestionController {
     }
 
     @GetMapping("/{id}")
-    public QuestionDto getQuestion(@PathVariable("id") Integer id) {
-        Question q = this.questionService.getQuestion(id);
+    public QuestionDto getQuestion(
+            @PathVariable("id") Integer id) {
 
-        return new QuestionDto(q);
+        return this.questionService.findById(id)
+                .map(QuestionDto :: new)
+                .orElseThrow(
+                        () -> new ServiceException("404-1", "게시물을 찾을 수 없습니다.")
+                );
     }
 
     @PostMapping
-    public QuestionDto questionCreate(@RequestBody @Valid QuestionForm questionForm) {
-        Question q = this.questionService.create(questionForm.getTitle(), questionForm.getContent());
+    public RsData<QuestionDto> questionCreate(@RequestBody @Valid QuestionForm questionForm) {
+        Question question = this.questionService.create(questionForm.getTitle(), questionForm.getContent());
 
-        return new QuestionDto(q);
+        return new RsData<>(
+                "201-1",
+                "%d번 글이 작성되었습니다.".formatted(question.getId()),
+                new QuestionDto(question)
+        );
     }
+
+    @PutMapping("/{id}")
+    public RsData<QuestionDto> modify(
+            @PathVariable("id") Integer id,
+            @RequestBody @Valid QuestionForm questionForm
+    ) {
+        Question question = this.questionService.findById(id).orElseThrow(
+                () -> new ServiceException("404-1", "%d번 글은 존재하지 않습니다.".formatted(id))
+        );
+
+        this.questionService.modify(question, questionForm.getTitle(), questionForm.getContent());
+
+        return new RsData<>(
+                "200-1",
+                "%d번 글이 수정되었습니다.".formatted(id),
+                new QuestionDto(question)
+        );
+
+    }
+
+    @DeleteMapping("/{id}")
+    public RsData<Void> delete(
+            @PathVariable("id") Integer id
+    ) {
+        Question question = this.questionService.findById(id).orElseThrow(
+                () -> new ServiceException("404-1", "%d번 글은 존재하지 않습니다.".formatted(id))
+        );
+
+        this.questionService.delete(question);
+
+        return new RsData<>(
+                "200-1",
+                "%d번 글이 삭제되었습니다.".formatted(id)
+        );
+
+
+    }
+
+
 
 
 

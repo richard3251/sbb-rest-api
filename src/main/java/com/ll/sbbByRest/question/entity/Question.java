@@ -1,12 +1,14 @@
 package com.ll.sbbByRest.question.entity;
 
 import com.ll.sbbByRest.answer.entity.Answer;
+import com.ll.sbbByRest.user.entity.SiteUser;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Entity
 @Getter
@@ -27,4 +29,16 @@ public class Question {
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.REMOVE)
     private List<Answer> answerList;
+
+    @ManyToOne
+    private SiteUser author;
+
+
+    public Optional<Answer> getAnswerById(Integer answerId) {
+        return answerList.stream()
+                .filter(answer -> answer.getId() == answerId)
+                .findFirst();
+    }
+
+
 }
