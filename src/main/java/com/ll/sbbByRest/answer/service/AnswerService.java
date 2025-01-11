@@ -24,6 +24,13 @@ public class AnswerService {
         return answer;
     }
 
+    public void modify(Answer answer, String content) {
+        answer.setContent(content);
+        answer.setCreateDate(LocalDateTime.now());
+
+        answerRepository.save(answer);
+    }
+
 
 
 
