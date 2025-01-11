@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +32,13 @@ public class AnswerService {
         answerRepository.save(answer);
     }
 
+    public Optional<Answer> findById(Integer id) {
+       return answerRepository.findById(id);
+    }
+
+    public void delete(Answer answer) {
+        this.answerRepository.delete(answer);
+    }
 
 
 

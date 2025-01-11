@@ -96,6 +96,28 @@ public class AnswerController {
 
     }
 
+    @DeleteMapping("/{id}")
+    public RsData<Void> delete(
+            @PathVariable("postId") Integer postId,
+            @PathVariable("id") Integer id
+    ) {
+
+        this.questionService.findById(postId).orElseThrow(
+                () -> new ServiceException("404-1", "%d번 글은 존재하지 않습니다.".formatted(postId))
+        );
+
+        Answer answer = this.answerService.findById(id).orElseThrow(
+                () -> new ServiceException("404-2", "%d번 댓글은 존재하지 않습니다.".formatted(id))
+        );
+
+        this.answerService.delete(answer);
+
+        return new RsData<>(
+                "200-1",
+                "%d번 댓글이 삭제 되었습니다.".formatted(id)
+        );
+    }
+
 
 
 
